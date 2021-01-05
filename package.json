@@ -1,0 +1,31 @@
+{
+  "name": "qwd-realworld-nuxtjs",
+  "version": "0.1.0",
+  "description": "使用vue+nuxt.js实现一个同构渲染的简单博客",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nuxt"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xiaobai-it/fed-e-task-03-03.git"
+  },
+  "keywords": [
+    "vue",
+    "nuxt。"
+  ],
+  "author": "qwd",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xiaobai-it/fed-e-task-03-03/issues"
+  },
+  "homepage": "https://github.com/xiaobai-it/fed-e-task-03-03#readme",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "cookieparser": "^0.1.0",
+    "dayjs": "^1.8.28",
+    "js-cookie": "^2.2.1",
+    "markdown-it": "^11.0.0",
+    "nuxt": "^2.12.2"
+  }
+}
