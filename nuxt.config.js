@@ -1,5 +1,6 @@
 export default {
   router: {
+    linkExactActiveClass: 'active', // <nuxt-link>标签默认 active class（类名）严格模式
     // 自定义nuxtjs的路由规则
     extendRoutes(routes, resolve) {
       // 清除 Nuxt.js 基于 pages 目录默认生成的路由表规则

@@ -13,11 +13,23 @@
         <div class="col-md-9">
           <div class="feed-toggle">
             <ul class="nav nav-pills outline-active">
-              <li class="nav-item">
-                <a class="nav-link disabled" href="">Your Feed</a>
+              <li class="nav-item" v-if="users && users.username">
+                <nuxt-link
+                  class="nav-link"
+                  :class="{ active: tab === 'your_feed' }"
+                  to="/"
+                >
+                  Your Feed
+                </nuxt-link>
               </li>
               <li class="nav-item">
-                <a class="nav-link active" href="">Global Feed</a>
+                <nuxt-link
+                  class="nav-link"
+                  :class="{ active: tab === 'global_feed' }"
+                  to="/"
+                >
+                  Global Feed
+                </nuxt-link>
               </li>
             </ul>
           </div>
@@ -88,6 +100,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
   // layout: 'blogTopAndBottom', // 用nuxt中的页面组件包裹当前组件
   props: [''],
@@ -99,7 +112,9 @@ export default {
 
   mounted() {}, // 生命周期 - 挂载之后
 
-  computed: {},
+  computed: {
+    ...mapState(['users']),
+  },
 
   methods: {},
 
