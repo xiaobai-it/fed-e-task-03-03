@@ -66,6 +66,7 @@ import { login, registe } from '../api/users'
 const Cookie = process.client ? require('js-cookie') : undefined
 
 export default {
+  middleware: 'authenticated', // 用户已经登录了，使用nuxtjs，跳转到首页
   props: [''],
   components: {}, // 注册组件
   name: 'LoginOrRegiste',

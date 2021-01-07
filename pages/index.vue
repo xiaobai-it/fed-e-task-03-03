@@ -17,7 +17,13 @@
                 <nuxt-link
                   class="nav-link"
                   :class="{ active: tab === 'your_feed' }"
-                  to="/"
+                  exact
+                  :to="{
+                    name: 'home',
+                    query: {
+                      tab: 'your_feed',
+                    },
+                  }"
                 >
                   Your Feed
                 </nuxt-link>
@@ -26,7 +32,10 @@
                 <nuxt-link
                   class="nav-link"
                   :class="{ active: tab === 'global_feed' }"
-                  to="/"
+                  exact
+                  :to="{
+                    name: 'home',
+                  }"
                 >
                   Global Feed
                 </nuxt-link>
@@ -34,48 +43,47 @@
             </ul>
           </div>
 
-          <div class="article-preview">
-            <div class="article-meta">
-              <a href="profile.html"
-                ><img src="http://i.imgur.com/Qr71crq.jpg"
-              /></a>
-              <div class="info">
-                <a href="" class="author">Eric Simons</a>
-                <span class="date">January 20th</span>
+          <template v-if="totalPages > 0">
+            <div
+              class="article-preview"
+              v-for="article in articles"
+              :key="article.slug"
+            >
+              <div class="article-meta">
+                <nuxt-link :to="`/profile/${article.author.username}`"
+                  ><img :src="article.author.image"
+                /></nuxt-link>
+                <div class="info">
+                  <a href="" class="author">{{ article.author.username }}</a>
+                  <span class="date">
+                    {{ article.createdAt | formatDate('MMM DD, YYYY') }}
+                  </span>
+                </div>
+                <button class="btn btn-outline-primary btn-sm pull-xs-right">
+                  <i class="ion-heart"></i> {{ article.favoritesCount }}
+                </button>
               </div>
-              <button class="btn btn-outline-primary btn-sm pull-xs-right">
-                <i class="ion-heart"></i> 29
-              </button>
-            </div>
-            <a href="" class="preview-link">
-              <h1>How to build webapps that scale</h1>
-              <p>This is the description for the post.</p>
-              <span>Read more...</span>
-            </a>
-          </div>
+              <a href="" class="preview-link">
+                <h1>{{ article.title }}</h1>
+                <p>{{ article.description }}</p>
+                <ul>
+                  <li
+                    class="index-article-tag-style"
+                    v-for="(item, index) in article.tagList"
+                    :key="index"
+                  >
+                    {{ item }}
+                  </li>
+                </ul>
 
-          <div class="article-preview">
-            <div class="article-meta">
-              <a href="profile.html"
-                ><img src="http://i.imgur.com/N4VcUeJ.jpg"
-              /></a>
-              <div class="info">
-                <a href="" class="author">Albert Pai</a>
-                <span class="date">January 20th</span>
-              </div>
-              <button class="btn btn-outline-primary btn-sm pull-xs-right">
-                <i class="ion-heart"></i> 32
-              </button>
+                <span>Read more...</span>
+              </a>
             </div>
-            <a href="" class="preview-link">
-              <h1>
-                The song you won't ever stop singing. No matter how hard you
-                try.
-              </h1>
-              <p>This is the description for the post.</p>
-              <span>Read more...</span>
-            </a>
-          </div>
+          </template>
+
+          <template v-else>
+            <div class="article-preview">No articles are here... yet.</div>
+          </template>
         </div>
 
         <div class="col-md-3">
@@ -94,13 +102,27 @@
             </div>
           </div>
         </div>
+
+        <!-- 页数分页 -->
+        <ul class="pagination" v-if="totalPages > 0">
+          <li
+            class="page-item"
+            v-for="pages in totalPages"
+            :key="pages"
+            :class="{ active: pages === page }"
+          >
+            <nuxt-link class="page-link " to="/">{{ pages }} </nuxt-link>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { getGlobalArticles, getYourFeedArticles } from '../api/article'
 import { mapState } from 'vuex'
+
 export default {
   // layout: 'blogTopAndBottom', // 用nuxt中的页面组件包裹当前组件
   props: [''],
@@ -110,7 +132,38 @@ export default {
     return {}
   },
 
-  mounted() {}, // 生命周期 - 挂载之后
+  watchQuery: ['tab'], // nuxtjs中监视地址栏的中变化，一但变化，asyncData方法就会调用
+
+  //为了SEO，所以把请求数据的api放在的nuxtjs中的asyncData方法里
+  async asyncData(context) {
+    console.log(context.query)
+    const page = Number.parseInt(context.query.page || 1) // 页码
+    const tab = context.query.tab || 'global_feed' // 选项卡
+    const limit = 20 // 每页显示的文章数
+
+    const loadArticles =
+      tab === 'global_feed' ? getGlobalArticles : getYourFeedArticles
+
+    const [serverData] = await Promise.all([
+      loadArticles({
+        limit,
+        offset: (page - 1) * limit,
+      }),
+    ])
+
+    const totalPages = Math.floor(serverData.data.articlesCount / limit) // 文章总数
+
+    return {
+      articles: serverData.data.articles, // 所有文章
+      totalPages, // 文章总数
+      page, // 页码
+      tab, // 选项卡
+    }
+  },
+
+  mounted() {
+    console.log(this)
+  }, // 生命周期 - 挂载之后
 
   computed: {
     ...mapState(['users']),
@@ -121,4 +174,14 @@ export default {
   watch: {},
 }
 </script>
-<style lang="" scoped></style>
+
+<style lang="css" scoped>
+.index-article-tag-style {
+  list-style: none;
+  padding: 0 10px;
+  border: 1px solid #ccc;
+  float: left;
+  border-radius: 10px;
+  margin-right: 5px;
+}
+</style>

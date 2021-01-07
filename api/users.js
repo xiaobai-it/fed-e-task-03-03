@@ -1,4 +1,4 @@
-import { myAxios } from './apiConfig'
+import { myAxios } from '../plugins/apiConfig'
 
 //登录
 export const login = (loginData) => {

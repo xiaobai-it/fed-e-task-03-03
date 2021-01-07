@@ -51,6 +51,7 @@
 
 <script>
 export default {
+  middleware: 'notauthenticated', // 用户没有登录，使用nuxtjs，跳转到登录页
   props: [''],
   components: {}, // 注册组件
   name: '',
