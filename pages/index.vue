@@ -31,13 +31,24 @@
               <li class="nav-item">
                 <nuxt-link
                   class="nav-link"
-                  :class="{ active: tab === 'global_feed' }"
+                  :class="{ active: tab === 'global_feed' && tag==='undefined' }"
                   exact
                   :to="{
                     name: 'home',
                   }"
                 >
                   Global Feed
+                </nuxt-link>
+              </li>
+              <li class="nav-item"  >
+                <nuxt-link class="nav-link" 
+                  :class="{ active: tag?true:false}"
+                  exact
+                  :to="{
+                    name: 'home',
+                    query:{ tag}
+                  }">
+                  <i class="ion-pound" v-if="tag"></i>{{tag}}
                 </nuxt-link>
               </li>
             </ul>
@@ -54,7 +65,7 @@
                   ><img :src="article.author.image"
                 /></nuxt-link>
                 <div class="info">
-                  <a href="" class="author">{{ article.author.username }}</a>
+                  <nuxt-link :to="`/profile/${article.author.username}`" class="author">{{ article.author.username }}</nuxt-link>
                   <span class="date">
                     {{ article.createdAt | formatDate('MMM DD, YYYY') }}
                   </span>
@@ -63,7 +74,7 @@
                   <i class="ion-heart"></i> {{ article.favoritesCount }}
                 </button>
               </div>
-              <a href="" class="preview-link">
+              <nuxt-link :to="`/article/${article.slug}`" class="preview-link">
                 <h1>{{ article.title }}</h1>
                 <p>{{ article.description }}</p>
                 <ul>
@@ -77,7 +88,7 @@
                 </ul>
 
                 <span>Read more...</span>
-              </a>
+              </nuxt-link>
             </div>
           </template>
 
@@ -90,15 +101,15 @@
           <div class="sidebar">
             <p>Popular Tags</p>
 
-            <div class="tag-list">
-              <a href="" class="tag-pill tag-default">programming</a>
-              <a href="" class="tag-pill tag-default">javascript</a>
-              <a href="" class="tag-pill tag-default">emberjs</a>
-              <a href="" class="tag-pill tag-default">angularjs</a>
-              <a href="" class="tag-pill tag-default">react</a>
-              <a href="" class="tag-pill tag-default">mean</a>
-              <a href="" class="tag-pill tag-default">node</a>
-              <a href="" class="tag-pill tag-default">rails</a>
+            <div class="tag-list" >
+              <nuxt-link 
+                v-for="(tagItem,index) in allTags" :key="index"
+                :to="{name:'home',query:{tag: tagItem}}" 
+                class="tag-pill tag-default" 
+                exact
+              >
+              {{tagItem}}
+              </nuxt-link>
             </div>
           </div>
         </div>
@@ -111,7 +122,16 @@
             :key="pages"
             :class="{ active: pages === page }"
           >
-            <nuxt-link class="page-link " to="/">{{ pages }} </nuxt-link>
+            <nuxt-link 
+              class="page-link " 
+              :to="{
+                name:'home',
+                query:{page: pages,
+                       tag: $route.query.tag,}
+              }"
+            >
+              {{ pages }} 
+            </nuxt-link>
           </li>
         </ul>
       </div>
@@ -120,7 +140,8 @@
 </template>
 
 <script>
-import { getGlobalArticles, getYourFeedArticles } from '../api/article'
+import { getGlobalArticles, getYourFeedArticles,getRightTagsArticles } from '../api/article'
+import {getTags} from '../api/tag'
 import { mapState } from 'vuex'
 
 export default {
@@ -132,23 +153,36 @@ export default {
     return {}
   },
 
-  watchQuery: ['tab'], // nuxtjs中监视地址栏的中变化，一但变化，asyncData方法就会调用
+  watchQuery: ['tab','tag','page'], // nuxtjs中监视地址栏的中变化，一但变化，asyncData方法就会调用
 
   //为了SEO，所以把请求数据的api放在的nuxtjs中的asyncData方法里
   async asyncData(context) {
-    console.log(context.query)
     const page = Number.parseInt(context.query.page || 1) // 页码
     const tab = context.query.tab || 'global_feed' // 选项卡
+    const tag = context.query.tag // 首页的标签
     const limit = 20 // 每页显示的文章数
 
-    const loadArticles =
-      tab === 'global_feed' ? getGlobalArticles : getYourFeedArticles
+    console.log(context.query.tab)
+    console.log(context.query.tag)
+    console.log(context.query.page)
 
-    const [serverData] = await Promise.all([
+
+    let loadArticles
+    if(tag){
+      loadArticles = getRightTagsArticles
+    }else if (tab === 'your_feed'){
+      loadArticles = getYourFeedArticles
+    }else if ( tab === 'global_feed'){
+      loadArticles = getGlobalArticles
+    }
+    console.log(loadArticles)
+    const [serverData,allTags] = await Promise.all([
       loadArticles({
         limit,
         offset: (page - 1) * limit,
+        tag
       }),
+      getTags(),
     ])
 
     const totalPages = Math.floor(serverData.data.articlesCount / limit) // 文章总数
@@ -158,6 +192,8 @@ export default {
       totalPages, // 文章总数
       page, // 页码
       tab, // 选项卡
+      allTags:allTags.data.tags, // 所有的标签列表
+      tag, // 首页右侧的标签
     }
   },
 

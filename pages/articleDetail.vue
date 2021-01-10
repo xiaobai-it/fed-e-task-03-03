@@ -3,36 +3,54 @@
   <div class="article-page">
     <div class="banner">
       <div class="container">
-        <h1>How to build webapps that scale</h1>
+        <h1>{{detailData.title}}</h1>
 
         <div class="article-meta">
-          <a href=""><img src="http://i.imgur.com/Qr71crq.jpg"/></a>
+          <!-- 发表文章的用户头像+日期+用户名 -->
+          <a href=""><img :src="detailData.author.image"/></a>
           <div class="info">
-            <a href="" class="author">Eric Simons</a>
-            <span class="date">January 20th</span>
+            <a href="" class="author">{{detailData.author.username}}</a>
+            <span class="date">{{detailData.createdAt | formatDate('MMM DD, YYYY')}}</span>
           </div>
-          <button class="btn btn-sm btn-outline-secondary">
+
+          <button class="btn btn-sm btn-outline-secondary" v-if="users.username !== detailData.author.username">
             <i class="ion-plus-round"></i>
-            &nbsp; Follow Eric Simons <span class="counter">(10)</span>
+            &nbsp; Follow Raffaele Di Stazio <span class="counter">(10)</span>
+          </button>
+
+          <!-- 编辑文章 -->
+          <button @click="gotoEditorPage" class="btn btn-sm btn-outline-secondary" v-else>
+            <i class="ion-edit"></i>
+            &nbsp; Editor Article
           </button>
           &nbsp;&nbsp;
-          <button class="btn btn-sm btn-outline-primary">
+
+           <!--收藏文章 -->
+          <button class="btn btn-sm btn-outline-primary" v-if="users.username !== detailData.author.username">
             <i class="ion-heart"></i>
-            &nbsp; Favorite Post <span class="counter">(29)</span>
+            &nbsp; Favorite Article <span class="counter">(29)</span>
+          </button>
+
+          <!-- 删除文章 -->
+          <button class="btn btn-sm btn-outline-danger" v-else>
+            <i class="ion-trash-a"></i>
+            &nbsp; Delete Article
           </button>
         </div>
       </div>
     </div>
 
     <div class="container page">
+
       <div class="row article-content">
         <div class="col-md-12">
-          <p>
+          {{detailData.body}}
+          <!-- <p>
             Web development technologies have evolved at an incredible clip over
             the past few years.
           </p>
           <h2 id="introducing-ionic">Introducing RealWorld.</h2>
-          <p>It's a great solution for learning how other frameworks work.</p>
+          <p>It's a great solution for learning how other frameworks work.</p> -->
         </div>
       </div>
 
@@ -40,20 +58,28 @@
 
       <div class="article-actions">
         <div class="article-meta">
-          <a href="profile.html"><img src="http://i.imgur.com/Qr71crq.jpg"/></a>
+          <a href=""><img :src="detailData.author.image"/></a>
           <div class="info">
-            <a href="" class="author">Eric Simons</a>
-            <span class="date">January 20th</span>
+            <a href="" class="author">{{detailData.author.username}}</a>
+            <span class="date">{{detailData.createdAt | formatDate('MMM DD, YYYY')}}</span>
           </div>
 
-          <button class="btn btn-sm btn-outline-secondary">
+          <button class="btn btn-sm btn-outline-secondary" v-if="users.username !== detailData.author.username">
             <i class="ion-plus-round"></i>
             &nbsp; Follow Eric Simons <span class="counter">(10)</span>
           </button>
+           <button class="btn btn-sm btn-outline-secondary" v-else>
+            <i class="ion-edit"></i>
+            &nbsp; Editor Article
+          </button>
           &nbsp;
-          <button class="btn btn-sm btn-outline-primary">
+          <button class="btn btn-sm btn-outline-primary" v-if="users.username !== detailData.author.username">
             <i class="ion-heart"></i>
             &nbsp; Favorite Post <span class="counter">(29)</span>
+          </button>
+          <button class="btn btn-sm btn-outline-danger" v-else>
+            <i class="ion-trash-a"></i>
+            &nbsp; Delete Article
           </button>
         </div>
       </div>
@@ -70,7 +96,7 @@
             </div>
             <div class="card-footer">
               <img
-                src="http://i.imgur.com/Qr71crq.jpg"
+                :src="users.image"
                 class="comment-author-img"
               />
               <button class="btn btn-sm btn-primary">
@@ -79,7 +105,7 @@
             </div>
           </form>
 
-          <div class="card">
+          <!-- <div class="card">
             <div class="card-block">
               <p class="card-text">
                 With supporting text below as a natural lead-in to additional
@@ -97,9 +123,9 @@
               <a href="" class="comment-author">Jacob Schmidt</a>
               <span class="date-posted">Dec 29th</span>
             </div>
-          </div>
+          </div> -->
 
-          <div class="card">
+          <!-- <div class="card">
             <div class="card-block">
               <p class="card-text">
                 With supporting text below as a natural lead-in to additional
@@ -121,31 +147,49 @@
                 <i class="ion-trash-a"></i>
               </span>
             </div>
-          </div>
+          </div> -->
         </div>
-      </div>
+      </div> 
     </div>
   </div>
 </template>
 
 <script>
+import {getArticleDetail} from '../api/article'
+import {mapState} from 'vuex'
 export default {
   props: [''],
   components: {}, // 注册组件
-  name: '',
+  name: 'ArticleDeatil',
   data() {
     return {}
   },
+  async asyncData({isDev, route, store, env, params, query, req, res, redirect, error}) {
+    const slug = params.slug
+     const detailData = await getArticleDetail(slug)
+    if(detailData.status === 200){
+      return {
+        detailData:detailData.data.article
+      }
+    }
+  },
 
-  beforeCreate() {}, // 生命周期 - 创建之前
+  mounted() {
+    // console.log(this.users)
+    // console.log(this.detailData)
+  },
 
-  created() {}, // 生命周期 - 创建之后
+  computed: {
+    ...mapState(['users'])
+  },
 
-  mounted() {}, // 生命周期 - 挂载之后
-
-  computed: {},
-
-  methods: {},
+  methods: {
+    // 编辑文章
+    gotoEditorPage(){
+      // console.log(this.detailData)
+      this.$router.push(`/editor/${this.detailData.slug}`)
+    }
+  },
 
   watch: {},
 }
