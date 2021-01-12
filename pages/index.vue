@@ -31,7 +31,9 @@
               <li class="nav-item">
                 <nuxt-link
                   class="nav-link"
-                  :class="{ active: tab === 'global_feed' && tag==='undefined' }"
+                  :class="{
+                    active: tab === 'global_feed' && tag === 'undefined',
+                  }"
                   exact
                   :to="{
                     name: 'home',
@@ -40,15 +42,17 @@
                   Global Feed
                 </nuxt-link>
               </li>
-              <li class="nav-item"  >
-                <nuxt-link class="nav-link" 
-                  :class="{ active: tag?true:false}"
+              <li class="nav-item">
+                <nuxt-link
+                  class="nav-link"
+                  :class="{ active: tag ? true : false }"
                   exact
                   :to="{
                     name: 'home',
-                    query:{ tag}
-                  }">
-                  <i class="ion-pound" v-if="tag"></i>{{tag}}
+                    query: { tag },
+                  }"
+                >
+                  <i class="ion-pound" v-if="tag"></i>{{ tag }}
                 </nuxt-link>
               </li>
             </ul>
@@ -65,7 +69,11 @@
                   ><img :src="article.author.image"
                 /></nuxt-link>
                 <div class="info">
-                  <nuxt-link :to="`/profile/${article.author.username}`" class="author">{{ article.author.username }}</nuxt-link>
+                  <nuxt-link
+                    :to="`/profile/${article.author.username}`"
+                    class="author"
+                    >{{ article.author.username }}</nuxt-link
+                  >
                   <span class="date">
                     {{ article.createdAt | formatDate('MMM DD, YYYY') }}
                   </span>
@@ -101,36 +109,36 @@
           <div class="sidebar">
             <p>Popular Tags</p>
 
-            <div class="tag-list" >
-              <nuxt-link 
-                v-for="(tagItem,index) in allTags" :key="index"
-                :to="{name:'home',query:{tag: tagItem}}" 
-                class="tag-pill tag-default" 
+            <div class="tag-list">
+              <nuxt-link
+                v-for="(tagItem, index) in allTags"
+                :key="index"
+                :to="{ name: 'home', query: { tag: tagItem } }"
+                class="tag-pill tag-default"
                 exact
               >
-              {{tagItem}}
+                {{ tagItem }}
               </nuxt-link>
             </div>
           </div>
         </div>
 
         <!-- 页数分页 -->
-        <ul class="pagination" v-if="totalPages > 0">
+        <ul class="pagination" v-if="totalPages > 20">
           <li
             class="page-item"
             v-for="pages in totalPages"
             :key="pages"
             :class="{ active: pages === page }"
           >
-            <nuxt-link 
-              class="page-link " 
+            <nuxt-link
+              class="page-link "
               :to="{
-                name:'home',
-                query:{page: pages,
-                       tag: $route.query.tag,}
+                name: 'home',
+                query: { page: pages, tag: $route.query.tag },
               }"
             >
-              {{ pages }} 
+              {{ pages }}
             </nuxt-link>
           </li>
         </ul>
@@ -140,8 +148,12 @@
 </template>
 
 <script>
-import { getGlobalArticles, getYourFeedArticles,getRightTagsArticles } from '../api/article'
-import {getTags} from '../api/tag'
+import {
+  getGlobalArticles,
+  getYourFeedArticles,
+  getRightTagsArticles,
+} from '../api/article'
+import { getTags } from '../api/tag'
 import { mapState } from 'vuex'
 
 export default {
@@ -153,7 +165,7 @@ export default {
     return {}
   },
 
-  watchQuery: ['tab','tag','page'], // nuxtjs中监视地址栏的中变化，一但变化，asyncData方法就会调用
+  watchQuery: ['tab', 'tag', 'page'], // nuxtjs中监视地址栏的中变化，一但变化，asyncData方法就会调用
 
   //为了SEO，所以把请求数据的api放在的nuxtjs中的asyncData方法里
   async asyncData(context) {
@@ -166,33 +178,31 @@ export default {
     console.log(context.query.tag)
     console.log(context.query.page)
 
-
     let loadArticles
-    if(tag){
+    if (tag) {
       loadArticles = getRightTagsArticles
-    }else if (tab === 'your_feed'){
+    } else if (tab === 'your_feed') {
       loadArticles = getYourFeedArticles
-    }else if ( tab === 'global_feed'){
+    } else if (tab === 'global_feed') {
       loadArticles = getGlobalArticles
     }
-    console.log(loadArticles)
-    const [serverData,allTags] = await Promise.all([
+    const [serverData, allTags] = await Promise.all([
       loadArticles({
         limit,
         offset: (page - 1) * limit,
-        tag
+        tag,
       }),
       getTags(),
     ])
 
     const totalPages = Math.floor(serverData.data.articlesCount / limit) // 文章总数
-
+    console.log(serverData)
     return {
       articles: serverData.data.articles, // 所有文章
-      totalPages, // 文章总数
+      totalPages: totalPages ? totalPages : serverData.data.articles.length, // 文章总数
       page, // 页码
       tab, // 选项卡
-      allTags:allTags.data.tags, // 所有的标签列表
+      allTags: allTags.data.tags, // 所有的标签列表
       tag, // 首页右侧的标签
     }
   },

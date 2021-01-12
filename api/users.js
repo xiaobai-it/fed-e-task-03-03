@@ -15,3 +15,19 @@ export const registe = (registeData) => {
   //   registeData,
   // })
 }
+//
+export const getuserCenterInfo = (userCenterInfo) => {
+  const { author, limit, offset } = userCenterInfo
+  // console.log(userCenterInfo)
+  return myAxios.get(
+    `/api/articles?author=${author}&limit=${limit}&offset=${offset}`
+  )
+}
+
+export const getFavoritedInfo = (favoritedParams) => {
+  const { favorited, limit, offset } = favoritedParams
+  // console.log(userCenterInfo)
+  return myAxios.get(
+    `/api/articles?favorited=${favorited}&limit=${limit}&offset=${offset}`
+  )
+}
