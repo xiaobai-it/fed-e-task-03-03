@@ -61,3 +61,9 @@ export const addFavorite = (slug) => {
 export const deleteFavorite = (slug) => {
   return myAxios.delete(`/api/articles/${slug}/favorite`)
 }
+
+// 删除一篇自己发布的文章
+export const deleteSelfOneArticle = (slug) => {
+  console.log(slug)
+  return myAxios.delete(`/api/articles/${slug}`)
+}

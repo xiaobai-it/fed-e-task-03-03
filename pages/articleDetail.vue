@@ -64,7 +64,11 @@
           </button>
 
           <!-- 删除文章 -->
-          <button class="btn btn-sm btn-outline-danger" v-else>
+          <button
+            @click="gotoDeletePage"
+            class="btn btn-sm btn-outline-danger"
+            v-else
+          >
             <i class="ion-trash-a"></i>
             &nbsp; Delete Article
           </button>
@@ -106,7 +110,6 @@
               name: 'profile',
               params: {
                 username: detailData.author.username,
-                articleUser: detailData.author,
               },
             }"
           >
@@ -121,7 +124,6 @@
                 name: 'profile',
                 params: {
                   username: detailData.author.username,
-                  articleUser: detailData.author,
                 },
               }"
             >
@@ -147,10 +149,17 @@
             }}
             <!-- <span class="counter">(0)</span> -->
           </button>
-          <button class="btn btn-sm btn-outline-secondary" v-else>
+
+          <!-- 编辑文章 -->
+          <button
+            @click="gotoEditorPage"
+            class="btn btn-sm btn-outline-secondary"
+            v-else
+          >
             <i class="ion-edit"></i>
             &nbsp; Editor Article
           </button>
+
           &nbsp;
           <!-- 收藏文章 -->
           <button
@@ -166,7 +175,12 @@
             <!-- &nbsp; Unfavorite Article <span class="counter">(29)</span> -->
           </button>
 
-          <button class="btn btn-sm btn-outline-danger" v-else>
+          <!-- 删除文章 -->
+          <button
+            @click="gotoDeletePage"
+            class="btn btn-sm btn-outline-danger"
+            v-else
+          >
             <i class="ion-trash-a"></i>
             &nbsp; Delete Article
           </button>
@@ -251,6 +265,7 @@ import {
   deleteFollowQuanbh,
   addFavorite,
   deleteFavorite,
+  deleteSelfOneArticle,
 } from '../api/article'
 import { mapState } from 'vuex'
 export default {
@@ -327,6 +342,12 @@ export default {
     gotoEditorPage() {
       // console.log(this.detailData)
       this.$router.push(`/editor/${this.detailData.slug}`)
+    },
+
+    // 删除自己的一篇文章
+    async gotoDeletePage() {
+      await deleteSelfOneArticle(this.$route.params.slug)
+      this.$router.push('/') // 跳转到首页
     },
 
     //点击favorite 按钮

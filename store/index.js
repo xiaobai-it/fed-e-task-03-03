@@ -28,7 +28,6 @@ export const actions = {
     let user = null
     let followingData = null
     let favoriteData = null
-
     // 如果请求头中有 Cookie
     if (req.headers.cookie) {
       // 使用 cookieparser 把 cookie 字符串转为 JavaScript 对象
@@ -48,7 +47,7 @@ export const actions = {
         followingData = JSON.parse(parsed.cookFollowing)
         favoriteData = JSON.parse(parsed.cookFavorite)
         // console.log(followingData)
-        console.log(favoriteData)
+        // console.log(favoriteData)
       } catch (err) {
         // No valid cookie found
       }

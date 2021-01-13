@@ -6,47 +6,55 @@
         <div class="col-md-6 offset-md-3 col-xs-12">
           <h1 class="text-xs-center">Your Settings</h1>
 
-          <form>
-            <fieldset>
-              <fieldset class="form-group">
-                <input
-                  class="form-control"
-                  type="text"
-                  placeholder="URL of profile picture"
-                />
-              </fieldset>
-              <fieldset class="form-group">
-                <input
-                  class="form-control form-control-lg"
-                  type="text"
-                  placeholder="Your Name"
-                />
-              </fieldset>
-              <fieldset class="form-group">
-                <textarea
-                  class="form-control form-control-lg"
-                  rows="8"
-                  placeholder="Short bio about you"
-                ></textarea>
-              </fieldset>
-              <fieldset class="form-group">
-                <input
-                  class="form-control form-control-lg"
-                  type="text"
-                  placeholder="Email"
-                />
-              </fieldset>
-              <fieldset class="form-group">
-                <input
-                  class="form-control form-control-lg"
-                  type="password"
-                  placeholder="Password"
-                />
-              </fieldset>
-              <button class="btn btn-lg btn-primary pull-xs-right">
-                Update Settings
-              </button>
+          <form v-if="userInfo">
+            <fieldset class="form-group">
+              <input
+                class="form-control form-control-lg"
+                type="text"
+                placeholder="URL of profile picture"
+                v-model="userInfo.image"
+              />
             </fieldset>
+            <fieldset class="form-group">
+              <input
+                class="form-control form-control-lg"
+                type="text"
+                placeholder="Your Name"
+                v-model="userInfo.username"
+              />
+            </fieldset>
+
+            <fieldset class="form-group">
+              <textarea
+                class="form-control form-control-lg"
+                rows="8"
+                placeholder="Short bio about you"
+                v-model="userInfo.bio"
+              >
+              </textarea>
+            </fieldset>
+            <fieldset class="form-group">
+              <input
+                class="form-control form-control-lg"
+                type="text"
+                placeholder="Email"
+                v-model="userInfo.email"
+              />
+            </fieldset>
+            <fieldset class="form-group">
+              <input
+                class="form-control form-control-lg"
+                type="password"
+                placeholder="New Password"
+                v-model="userInfo.newPassword"
+              />
+            </fieldset>
+            <button
+              class="btn btn-lg btn-primary pull-xs-right"
+              @click.prevent="submit"
+            >
+              {{ 'Update Settings' }}
+            </button>
           </form>
         </div>
       </div>
@@ -55,24 +63,44 @@
 </template>
 
 <script>
+import { getOneUserLoginInfo } from '../api/users'
 export default {
   middleware: 'notauthenticated', // 用户没有登录，使用nuxtjs，跳转到登录页
   props: [''],
   components: {}, // 注册组件
-  name: '',
+  name: 'Setting',
   data() {
-    return {}
+    return {
+      userInfo: {},
+    }
   },
 
-  beforeCreate() {}, // 生命周期 - 创建之前
+  mounted() {
+    this.getUserLoginInfo()
+  }, // 生命周期 - 挂载之后
 
-  created() {}, // 生命周期 - 创建之后
-
-  mounted() {}, // 生命周期 - 挂载之后
-
-  computed: {},
-
-  methods: {},
+  methods: {
+    async getUserLoginInfo() {
+      const loginUser = await getOneUserLoginInfo()
+      console.log(loginUser.data.user)
+      this.userInfo = loginUser.data.user
+    },
+    // 提交更新后的用户数据
+    async submit() {
+      const updateUserInfo = {
+        bio: this.userInfo.bio,
+        email: this.userInfo.email,
+        image: this.userInfo.image,
+        password: this.userInfo.password, // 新密码应该也是password
+        username: this.userInfo.username,
+      }
+      console.log(updateUserInfo)
+      const loginUser = await getOneUserLoginInfo(updateUserInfo)
+      console.log(loginUser.data.user)
+      // 跳转到用户中心页面
+      this.$router.push(`/profile/${loginUser.data.user.username}`)
+    },
+  },
 
   watch: {},
 }

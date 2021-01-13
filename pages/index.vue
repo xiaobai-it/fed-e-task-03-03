@@ -199,7 +199,7 @@ export default {
     console.log(serverData)
     return {
       articles: serverData.data.articles, // 所有文章
-      totalPages: totalPages ? totalPages : serverData.data.articles.length, // 文章总数
+      totalPages: totalPages ? totalPages : serverData.data.articles.length, // 文章分页总数
       page, // 页码
       tab, // 选项卡
       allTags: allTags.data.tags, // 所有的标签列表

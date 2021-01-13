@@ -32,7 +32,7 @@ export default {
               },
               {
                 path: '/profile/:username',
-                name: 'profile', // 用户页面
+                name: 'profile', // 用户中心页面
                 component: resolve(__dirname, 'pages/profile.vue'), // nuxtjs中被页面组件，包裹的子组件（路由组件）
               },
               // {
