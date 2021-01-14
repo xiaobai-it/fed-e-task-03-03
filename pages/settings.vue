@@ -55,6 +55,7 @@
             >
               {{ 'Update Settings' }}
             </button>
+            <hr />
           </form>
         </div>
       </div>

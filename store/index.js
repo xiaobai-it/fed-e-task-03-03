@@ -8,15 +8,15 @@ export const state = () => ({
 
 export const mutations = {
   saveUsrsLoginInfo(state, usersLoginInfo) {
-    console.log('saveUsrsLoginInfo刷新页面被触发了')
+    // console.log('saveUsrsLoginInfo刷新页面被触发了')
     state.users = usersLoginInfo
   },
   saveFollowing(state, followingData) {
-    console.log('saveFollowing刷新页面被触发了')
+    // console.log('saveFollowing刷新页面被触发了')
     state.vuex_following = followingData
   },
   saveFavorite(state, favoriteData) {
-    console.log('saveFavorite刷新页面被触发了')
+    // console.log('saveFavorite刷新页面被触发了')
     state.vuex_favorite = favoriteData
   },
 }
@@ -32,7 +32,7 @@ export const actions = {
     if (req.headers.cookie) {
       // 使用 cookieparser 把 cookie 字符串转为 JavaScript 对象
       const parsed = cookieparser.parse(req.headers.cookie)
-      console.log('parsed', parsed)
+      // console.log('parsed', parsed)
       // parsed {
       //   user: '{"id":133546,"email":"qwd@qq.com",
       //   "createdAt": "2021-01-05T08:06:31.495Z",
@@ -46,9 +46,11 @@ export const actions = {
         user = JSON.parse(parsed.user)
         followingData = JSON.parse(parsed.cookFollowing)
         favoriteData = JSON.parse(parsed.cookFavorite)
-        // console.log(followingData)
+
+        console.log(user)
         // console.log(favoriteData)
       } catch (err) {
+        console.log('解析失败')
         // No valid cookie found
       }
     }

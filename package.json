@@ -4,7 +4,9 @@
   "description": "使用vue+nuxt.js实现一个同构渲染的简单博客",
   "main": "index.js",
   "scripts": {
-    "dev": "nuxt"
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start"
   },
   "repository": {
     "type": "git",

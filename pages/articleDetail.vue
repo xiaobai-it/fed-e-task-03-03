@@ -79,8 +79,8 @@
     <div class="container page">
       <!-- 文章详情内容 -->
       <div class="row article-content">
-        <div class="col-md-12">
-          {{ detailData.body }}
+        <div class="col-md-12" v-html="detailData.body">
+          <!-- {{ detailData.body }} -->
           <div class="tag-list" style="margin-top:30px;">
             <div
               v-for="(tagItem, index) in detailData.tagList"
@@ -196,60 +196,50 @@
                 class="form-control"
                 placeholder="Write a comment..."
                 rows="3"
+                v-model="articleComments"
               ></textarea>
             </div>
             <div class="card-footer">
               <img :src="users.image" class="comment-author-img" />
-              <button class="btn btn-sm btn-primary">
+              <button
+                class="btn btn-sm btn-primary"
+                @click.prevent="addComments"
+              >
                 Post Comment
               </button>
             </div>
           </form>
 
           <!-- 评论区域 -->
-          <!-- <div class="card">
-            <div class="card-block">
-              <p class="card-text">
-                With supporting text below as a natural lead-in to additional
-                content.
-              </p>
+          <template v-if="allComments.length > 0">
+            <div class="card" v-for="comment in allComments" :key="comment.id">
+              <div class="card-block">
+                <p class="card-text">
+                  {{ comment.body }}
+                </p>
+              </div>
+              <div class="card-footer">
+                <nuxt-link to="" class="comment-author">
+                  <img :src="comment.author.image" class="comment-author-img" />
+                </nuxt-link>
+                &nbsp;
+                <nuxt-link to="" class="comment-author">{{
+                  comment.author.username
+                }}</nuxt-link>
+                <span class="date-posted">{{
+                  comment.author.createdAt | formatDate('MMMM DD,YYYY')
+                }}</span>
+                <span class="mod-options">
+                  <!-- <i class="ion-edit"></i> -->
+                  <i
+                    class="ion-trash-a"
+                    v-if="comment.author.username === users.username"
+                    @click="deleteOneComment(comment.id)"
+                  ></i>
+                </span>
+              </div>
             </div>
-            <div class="card-footer">
-              <a href="" class="comment-author">
-                <img
-                  src="http://i.imgur.com/Qr71crq.jpg"
-                  class="comment-author-img"
-                />
-              </a>
-              &nbsp;
-              <a href="" class="comment-author">Jacob Schmidt</a>
-              <span class="date-posted">Dec 29th</span>
-            </div>
-          </div> -->
-
-          <!-- <div class="card">
-            <div class="card-block">
-              <p class="card-text">
-                With supporting text below as a natural lead-in to additional
-                content.
-              </p>
-            </div>
-            <div class="card-footer">
-              <a href="" class="comment-author">
-                <img
-                  src="http://i.imgur.com/Qr71crq.jpg"
-                  class="comment-author-img"
-                />
-              </a>
-              &nbsp;
-              <a href="" class="comment-author">Jacob Schmidt</a>
-              <span class="date-posted">Dec 29th</span>
-              <span class="mod-options">
-                <i class="ion-edit"></i>
-                <i class="ion-trash-a"></i>
-              </span>
-            </div>
-          </div> -->
+          </template>
         </div>
       </div>
     </div>
@@ -259,6 +249,7 @@
 <script>
 // 仅在客户端加载 js-cookie 包
 const Cookie = process.client ? require('js-cookie') : undefined
+import MarkdownIt from 'markdown-it'
 import {
   getArticleDetail,
   addFollowQuanbh,
@@ -266,6 +257,8 @@ import {
   addFavorite,
   deleteFavorite,
   deleteSelfOneArticle,
+  addOneComments,
+  deleteComment,
 } from '../api/article'
 import { mapState } from 'vuex'
 export default {
@@ -274,28 +267,47 @@ export default {
   name: 'ArticleDeatil',
   data() {
     return {
-      detailData: {},
+      // detailData: {},
+      articleComments: '', //添加文章评论信息
+      allComments: [], // 获取文章所有的评论信息
+    }
+  },
+  // 设置页面meta优化SEO
+  head() {
+    return {
+      title: `${this.detailData.title} - RealWorld`,
+      meta: [
+        {
+          hid: 'description',
+          name: 'description',
+          content: this.detailData.description,
+        },
+      ],
     }
   },
   // asyncData({isDev, route, store, env, params, query, req, res, redirect, error}) {
 
   // },
 
-  // async asyncData({ params, route }) {
-  //   const slug = params.slug
-  //   const detailData = await getArticleDetail(slug)
-  //   if (detailData.status === 200) {
-  //     return {
-  //       detailData: detailData.data.article,
-  //     }
-  //   }
-  // },
+  async asyncData({ params, route }) {
+    const slug = params.slug
+    const md = new MarkdownIt()
+    // 获取文章详情数据
+    const detailData = await getArticleDetail(slug)
+    if (detailData.status === 200) {
+      const body = md.render(detailData.data.article.body)
+      detailData.data.article.body = body
+      return {
+        detailData: detailData.data.article,
+      }
+    }
+  },
 
   mounted() {
     // console.log(this.users)
     // console.log(this.detailData)
     // this.following()
-    this.startGetArticleDetail(this.$route.params.slug)
+    this.getArticleAllComments()
   },
 
   computed: {
@@ -329,15 +341,6 @@ export default {
   },
 
   methods: {
-    // 获取文章详情数据
-    async startGetArticleDetail(slug) {
-      console.log('执行了')
-      const detailData = await getArticleDetail(slug)
-      if (detailData.status === 200) {
-        this.detailData = detailData.data.article
-        console.log(this.detailData)
-      }
-    },
     // 编辑文章
     gotoEditorPage() {
       // console.log(this.detailData)
@@ -414,6 +417,45 @@ export default {
       console.log(followingData)
       // 把用follow按钮的状态，保存在本地，确保页面刷新后，数据不会丢失，
       Cookie.set('cookFollowing', followingData)
+    },
+
+    // 添加一条评论
+    async addComments() {
+      // console.log(this.articleComments)
+      // console.log(this.$route.params.slug)
+      const comments = {
+        slug: this.$route.params.slug,
+        comment: { body: this.articleComments },
+      }
+      const commentsRes = await addOneComments(comments)
+      console.log(commentsRes)
+      if (commentsRes.status === 200) {
+        // 重新获取文章的所有评论
+        // this.getArticleAllComments()
+        this.allComments.unshift(commentsRes.data.comment)
+        this.articleComments = ''
+      }
+    },
+    // 获取文章的所有评论
+    async getArticleAllComments() {
+      const allCommentsRes = await addOneComments(this.$route.params.slug)
+      if (allCommentsRes.status === 200) {
+        this.allComments = allCommentsRes.data.comments
+        console.log(allCommentsRes.data)
+      }
+    },
+    // 删除指定的一条评论
+    async deleteOneComment(commentId) {
+      const deleteParams = {
+        slug: this.$route.params.slug,
+        commentId,
+      }
+      const deleteAafterData = await deleteComment(deleteParams)
+      if (deleteAafterData.status === 200) {
+        this.allComments = this.allComments.filter(
+          (item) => item.id !== commentId
+        )
+      }
     },
   },
 

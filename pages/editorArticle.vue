@@ -34,7 +34,7 @@
                 <input
                   type="text"
                   class="form-control"
-                  placeholder="Enter tags"
+                  placeholder="Enter tags And Separate with commas"
                   v-model="tag"
                 />
                 <div class="tag-list"></div>

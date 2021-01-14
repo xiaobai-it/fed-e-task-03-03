@@ -22,35 +22,39 @@
             </template>
           </ul>
 
-          <form>
+          <form @submit.prevent="submit">
+            <!-- 用户名 -->
             <fieldset class="form-group" v-if="$route.path === '/registe'">
               <input
                 class="form-control form-control-lg"
                 type="text"
                 placeholder="Your Name"
                 v-model="user.username"
+                required
               />
             </fieldset>
+            <!-- 邮箱 -->
             <fieldset class="form-group">
               <input
                 class="form-control form-control-lg"
                 type="text"
                 placeholder="Email"
                 v-model="user.email"
+                required
               />
             </fieldset>
+            <!-- 密码 -->
             <fieldset class="form-group">
               <input
                 class="form-control form-control-lg"
                 type="password"
                 placeholder="Password"
                 v-model="user.password"
+                required
+                minlength="8"
               />
             </fieldset>
-            <button
-              class="btn btn-lg btn-primary pull-xs-right"
-              @click.prevent="submit"
-            >
+            <button class="btn btn-lg btn-primary pull-xs-right">
               {{ loginOrregiste ? 'Sign up' : 'Sign in' }}
             </button>
           </form>

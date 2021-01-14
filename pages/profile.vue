@@ -20,6 +20,7 @@
             <button
               class="btn btn-sm btn-outline-secondary action-btn"
               @click="follow()"
+              v-if="articleUser.username !== users.username"
             >
               <i class="ion-plus-round"></i>
               &nbsp;
@@ -29,6 +30,14 @@
                   : `Follow ${articleUser.username}`
               }}
               <!-- {{ articleUser.username }} -->
+            </button>
+            <button
+              class="btn btn-sm btn-outline-secondary action-btn"
+              @click="gotoEditSettings()"
+              v-else
+            >
+              <i class="ion-gear-a"></i>
+              &nbsp; Edit Profile Settings
             </button>
           </div>
         </div>
@@ -45,7 +54,7 @@
               <li class="nav-item">
                 <nuxt-link
                   class="nav-link"
-                  :class="{ active: tag !== 'favoritesTag' }"
+                  :class="{ active: author !== 'favorites' }"
                   exact
                   :to="{
                     name: 'profile',
@@ -55,14 +64,15 @@
                   My Articles
                 </nuxt-link>
               </li>
+
               <li class="nav-item">
                 <nuxt-link
                   class="nav-link"
-                  :class="{ active: tag === 'favoritesTag' }"
+                  :class="{ active: author === 'favorites' }"
                   exact
                   :to="{
                     name: 'profile',
-                    query: { author: 'favorites', tag: 'favoritesTag' },
+                    query: { tag: 'favoritesTag', author: 'favorites' },
                   }"
                 >
                   Favorited Articles
@@ -77,6 +87,7 @@
             v-for="article in articles"
             :key="article.slug"
           >
+            <!-- 文章用户信息+收藏按钮 -->
             <div class="article-meta">
               <a href=""><img :src="article.author.image" class="user-img"/></a>
               <div class="info">
@@ -96,6 +107,7 @@
                 <i class="ion-heart"></i> {{ article.favoritesCount }}
               </button>
             </div>
+            <!-- 跳转文章详情页面 -->
             <nuxt-link :to="`/article/${article.slug}`" class="preview-link">
               <h1>{{ article.title }}</h1>
               <p>{{ article.description }}</p>
@@ -152,8 +164,6 @@ import {
   addFollowQuanbh,
   deleteFollowQuanbh,
 } from '../api/article'
-// 仅在客户端加载 js-cookie 包
-const Cookie = process.client ? require('js-cookie') : undefined
 import { mapState } from 'vuex'
 
 export default {
@@ -171,7 +181,6 @@ export default {
     const limit = params.limit || 5 // 每页显示的文章数
     const offset = (page - 1) * limit // 点击的是第几页
     let tag = query.tag ? query.tag : 'authorTag'
-
     let getserverData =
       query.author !== 'favorites' ? getuserCenterInfo : getFavoritedInfo
     let userCenter = ''
@@ -195,7 +204,7 @@ export default {
     }
 
     const articleUserSelf = await getArticleSelfUser(params.username)
-    console.log(userCenter.data.articles)
+    // console.log(userCenter.data.articles)
 
     return {
       articles: userCenter.data.articles,
@@ -210,7 +219,9 @@ export default {
   },
   mounted() {}, // 生命周期 - 挂载之后
 
-  computed: {},
+  computed: {
+    ...mapState(['users']),
+  },
 
   methods: {
     //点击favorite 按钮
@@ -232,19 +243,14 @@ export default {
         // 重新获取数据
         if (this.page === 1) {
           if (this.author == 'author' || this.author == undefined) {
-            console.log('执行了getuserCenterInfo')
             res = await getuserCenterInfo(params)
           } else if (this.author == 'favorites' && this.page === 1) {
-            console.log('执行了getuserCenterInfo')
             res = await getFavoritedInfo(params)
           }
         } else {
-          console.log('执行了getuserCenterInfo')
           res = await getArticleSelfPageData(params)
-          // console.log('getArticleSelfUser', res)
         }
         this.articles = res.data.articles
-        // this.successFavorite = true
       } else {
         // 删除
         favorite = await deleteFavorite(oneArticle[0].slug)
@@ -252,19 +258,15 @@ export default {
         // 重新获取数据
         if (this.page === 1) {
           if (this.author === undefined || this.author === 'author') {
-            console.log('执行了getuserCenterInfo')
             res = await getuserCenterInfo(params)
           } else if (this.author == 'favorites' && this.page === 1) {
-            console.log('getFavoritedInfo')
             res = await getFavoritedInfo(params)
           }
         } else {
           console.log('getArticleSelfUser')
           res = await getArticleSelfPageData(params)
-          // console.log('getArticleSelfUser', res)
         }
         this.articles = res.data.articles
-        // this.successFavorite = false
       }
     },
 
@@ -287,6 +289,10 @@ export default {
         await getArticleSelfUser(username)
         this.articleUser = follow.data.profile
       }
+    },
+    // 点击打开设置页面
+    gotoEditSettings() {
+      this.$router.push('/setting')
     },
   },
 

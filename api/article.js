@@ -67,3 +67,25 @@ export const deleteSelfOneArticle = (slug) => {
   console.log(slug)
   return myAxios.delete(`/api/articles/${slug}`)
 }
+
+// 添加一条评论信息 + 获取文章的所有评论信息
+export const addOneComments = (comments) => {
+  console.log(comments)
+  let comment = {}
+  comment.comment = comments.comment
+  if (comments.comment) {
+    return myAxios.post(`/api/articles/${comments.slug}/comments`, comment)
+  } else {
+    return myAxios.get(`/api/articles/${comments}/comments`)
+  }
+  // https://conduit.productionready.io/api/articles/-cxio5r/comments
+}
+
+// 删除文章的一条评论
+export const deleteComment = (deleteParams) => {
+  // console.log(deleteParams)
+  //conduit.productionready.io/api/articles/-cxio5r/comments/82414
+  return myAxios.delete(
+    `api/articles/${deleteParams.slug}/comments/${deleteParams.commentId}`
+  )
+}
