@@ -1,6 +1,12 @@
 export default {
   plugins: ['~/plugins/formatDate.js', '~/plugins/apiConfig.js'], // 在nuxt.js中添加插件的方法
 
+  // 把项目部署到服务器的时候，进行的配置
+  server: {
+    host: '0.0.0.0',
+    port: 3000,
+  },
+
   router: {
     linkExactActiveClass: 'active', // <nuxt-link>标签默认 active class（类名）严格模式
 
