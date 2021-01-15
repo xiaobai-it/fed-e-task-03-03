@@ -55,8 +55,11 @@
             >
               {{ 'Update Settings' }}
             </button>
-            <hr />
           </form>
+          <hr style="margin-top:80px;" />
+          <button class="btn btn-outline-danger" @click="logout">
+            Or click here to logout.
+          </button>
         </div>
       </div>
     </div>
@@ -64,7 +67,10 @@
 </template>
 
 <script>
+// 仅在客户端加载 js-cookie 包
+const Cookie = process.client ? require('js-cookie') : undefined
 import { getOneUserLoginInfo } from '../api/users'
+import { mapState } from 'vuex'
 export default {
   middleware: 'notauthenticated', // 用户没有登录，使用nuxtjs，跳转到登录页
   props: [''],
@@ -79,7 +85,9 @@ export default {
   mounted() {
     this.getUserLoginInfo()
   }, // 生命周期 - 挂载之后
-
+  computed: {
+    ...mapState(['users']),
+  },
   methods: {
     async getUserLoginInfo() {
       const loginUser = await getOneUserLoginInfo()
@@ -100,6 +108,14 @@ export default {
       console.log(loginUser.data.user)
       // 跳转到用户中心页面
       this.$router.push(`/profile/${loginUser.data.user.username}`)
+    },
+    // 退出登录
+    logout() {
+      // 清除用户在本地保存+vuex中的保存数据
+      this.$store.commit('clearUsrsLoginInfo')
+      Cookie.remove('user')
+      // 跳转到登录首页
+      this.$router.push('/')
     },
   },
 

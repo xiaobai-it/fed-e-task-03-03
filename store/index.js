@@ -19,6 +19,9 @@ export const mutations = {
     // console.log('saveFavorite刷新页面被触发了')
     state.vuex_favorite = favoriteData
   },
+  clearUsrsLoginInfo(state) {
+    state.users = {}
+  },
 }
 export const actions = {
   // nuxtServerInit 是一个特殊的 action 方法
