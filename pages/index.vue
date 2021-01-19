@@ -4,7 +4,8 @@
     <div class="banner">
       <div class="container">
         <h1 class="logo-font">conduit</h1>
-        <p>A place to share your knowledge.</p>
+        <!-- <p>A place to share your knowledge.</p> -->
+        <p>老子第一次手动部署自动化，不成功弄死你！！！！</p>
       </div>
     </div>
 
